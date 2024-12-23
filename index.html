@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>의회 투표 시스템</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            background-color: #121212;
+            color: #ffffff;
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            display: flex;
+            gap: 20px;
+        }
+        .input-section {
+            background-color: #1E1E1E;
+            padding: 20px;
+            border-radius: 10px;
+            width: 300px;
+        }
+        .input-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+        .input-row label {
+            flex: 1;
+            color: #B0B0B0;
+        }
+        .input-row input[type="number"], 
+        .input-row input[type="color"] {
+            flex: 1;
+        }
+        .chart-section {
+            flex: 2;
+            position: relative;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        .total-seats {
+            text-align: center;
+            background-color: #2C2C2C;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        #voteChart {
+            transform: rotate(180deg); /* 차트 반전 */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="input-section">
+            <h2 style="text-align: center; color: #4CAF50;">의회 투표 시스템</h2>
+            
+            <div class="input-row">
+                <label>의석 수</label>
+                <input type="number" id="totalSeatsInput" value="300" min="0">
+            </div>
+
+            <div class="input-row">
+                <label>찬성</label>
+                <input type="number" id="agreeInput" value="0" min="0">
+                <input type="color" id="agreeColor" value="#4CAF50">
+            </div>
+
+            <div class="input-row">
+                <label>반대</label>
+                <input type="number" id="disagreeInput" value="0" min="0">
+                <input type="color" id="disagreeColor" value="#F44336">
+            </div>
+
+            <div class="input-row">
+                <label>기권</label>
+                <input type="number" id="abstainInput" value="0" min="0">
+                <input type="color" id="abstainColor" value="#FFC107">
+            </div>
+
+            <div class="input-row">
+                <label>불참</label>
+                <input type="number" id="absentInput" value="0" min="0">
+                <input type="color" id="absentColor" value="#9E9E9E">
+            </div>
+
+            <div class="input-row">
+                <label>무효</label>
+                <input type="number" id="invalidInput" value="0" min="0">
+                <input type="color" id="invalidColor" value="#795548">
+            </div>
+
+            <button onclick="updateVote()">투표 현황 업데이트</button>
+
+            <div class="total-seats">
+                <h3>총 의석 현황</h3>
+                <p id="seatsBreakdown">총 의석: 300석</p>
+                <p id="majorityInfo">절대 과반수: 151석</p>
+            </div>
+        </div>
+
+        <div class="chart-section">
+            <canvas id="voteChart" width="200" height="150"></canvas> <!-- 차트 크기 조정 -->
+        </div>
+    </div>
+
+    <script>
+        let voteChart = null;
+
+        function updateVote() {
+            const totalSeats = parseInt(document.getElementById('totalSeatsInput').value || 300);
+            const agree = parseInt(document.getElementById('agreeInput').value || 0);
+            const disagree = parseInt(document.getElementById('disagreeInput').value || 0);
+            const abstain = parseInt(document.getElementById('abstainInput').value || 0);
+            const absent = parseInt(document.getElementById('absentInput').value || 0);
+            const invalid = parseInt(document.getElementById('invalidInput').value || 0);
+
+            const absoluteMajority = Math.floor(totalSeats / 2) + 1;
+
+            document.getElementById('seatsBreakdown').innerHTML = `총 의석: ${totalSeats}석`;
+            document.getElementById('majorityInfo').innerHTML = `절대 과반수: ${absoluteMajority}석`;
+
+            const ctx = document.getElementById('voteChart').getContext('2d');
+
+            if (voteChart) {
+                voteChart.destroy();
+            }
+
+            voteChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['찬성', '반대', '기권', '불참', '무효'],
+                    datasets: [{
+                        data: [agree, disagree, abstain, absent, invalid],
+                        backgroundColor: [
+                            document.getElementById('agreeColor').value,
+                            document.getElementById('disagreeColor').value,
+                            document.getElementById('abstainColor').value,
+                            document.getElementById('absentColor').value,
+                            document.getElementById('invalidColor').value
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    circumference: 180, // 반원으로 설정
+                    rotation: -90, // 차트 각도 조정
+                    cutout: '40%', // 도넛 홀 크기 조정
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+
+        // 페이지 로드 시 초기 차트 생성
+        document.addEventListener('DOMContentLoaded', updateVote);
+    </script>
+</body>
+</html>
